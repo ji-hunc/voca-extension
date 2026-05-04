@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (action === "auth.signIn") {
-    self.VocaAuth.signInWithGoogle()
+    self.VocaAuth.signInWithProvider(message.provider)
       .then((session) => sendResponse({ ok: true, session }))
       .catch((e) => sendResponse({ ok: false, error: e.message }));
     return true;

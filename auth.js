@@ -54,7 +54,13 @@
     return new URLSearchParams(redirectUrl.slice(hashIndex + 1));
   }
 
-  function signInWithGoogle() {
+  const SUPPORTED_PROVIDERS = new Set(["google"]);
+
+  function signInWithProvider(provider) {
+    const normalized = (provider || "google").toLowerCase();
+    if (!SUPPORTED_PROVIDERS.has(normalized)) {
+      return Promise.reject(new Error(`지원하지 않는 provider: ${provider}`));
+    }
     return new Promise((resolve, reject) => {
       let redirectURL;
       try {
@@ -63,7 +69,7 @@
         reject(new Error("identity API 사용 불가: " + e.message));
         return;
       }
-      const authURL = g.VocaSupabase.buildAuthorizeUrl(redirectURL);
+      const authURL = g.VocaSupabase.buildAuthorizeUrl(redirectURL, normalized);
 
       chrome.identity.launchWebAuthFlow(
         { url: authURL, interactive: true },
@@ -127,7 +133,7 @@
   g.VocaAuth = {
     getSession,
     getValidAccessToken,
-    signInWithGoogle,
+    signInWithProvider,
     signOut,
     clearSession,
   };

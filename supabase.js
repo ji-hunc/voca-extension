@@ -26,10 +26,10 @@
     return text ? JSON.parse(text) : null;
   }
 
-  function buildAuthorizeUrl(redirectTo) {
+  function buildAuthorizeUrl(redirectTo, provider) {
     const { SUPABASE_URL } = cfg();
     const params = new URLSearchParams({
-      provider: "google",
+      provider: provider || "google",
       redirect_to: redirectTo,
     });
     return `${SUPABASE_URL}/auth/v1/authorize?${params}`;
