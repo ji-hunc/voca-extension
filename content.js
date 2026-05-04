@@ -58,10 +58,10 @@
   function extractUser(session) {
     if (!session?.user) return null;
     const u = session.user;
-    const meta = u.user_metadata || {};
+    const appMeta = u.app_metadata || {};
     return {
       email: u.email || "",
-      avatarUrl: meta.avatar_url || meta.picture || "",
+      provider: appMeta.provider || "",
     };
   }
 
@@ -152,32 +152,43 @@
       anchorEvent
     );
     window.VocaPopup.bindAudioButtons(shadow);
-    window.VocaPopup.bindSaveButton(shadow, () =>
-      handleSaveClick(shadow, model, contextSentence)
-    );
+    window.VocaPopup.bindActionSlot(shadow, {
+      onLogin: (provider) =>
+        handleLoginClick(shadow, provider, model, contextSentence),
+      onSave: () => handleSaveClick(shadow, model, contextSentence),
+    });
+    window.VocaPopup.bindSettingsMenu(shadow, () => handleLogout(shadow));
+  }
+
+  async function handleLogout(shadow) {
+    await sendMessage({ action: "auth.signOut" });
+    window.VocaPopup.removeSettings(shadow);
+    window.VocaPopup.setSaveButtonState(shadow, "anon");
+  }
+
+  async function handleLoginClick(shadow, provider, model, contextSentence) {
+    window.VocaPopup.setSaveButtonState(shadow, "saving");
+    const signInResp = await sendMessage({ action: "auth.signIn", provider });
+    if (!signInResp.ok || !signInResp.session) {
+      window.VocaPopup.setSaveButtonState(
+        shadow,
+        "error",
+        signInResp.error || "로그인 실패"
+      );
+      setTimeout(() => {
+        window.VocaPopup.setSaveButtonState(shadow, "anon");
+      }, 2000);
+      return;
+    }
+    await persistWord(shadow, model, contextSentence);
   }
 
   async function handleSaveClick(shadow, model, contextSentence) {
-    let session = (await sendMessage({ action: "auth.getSession" })).session;
-
-    if (!session) {
-      window.VocaPopup.setSaveButtonState(shadow, "saving");
-      const signInResp = await sendMessage({ action: "auth.signIn" });
-      if (!signInResp.ok || !signInResp.session) {
-        window.VocaPopup.setSaveButtonState(
-          shadow,
-          "error",
-          signInResp.error || "로그인 실패"
-        );
-        setTimeout(() => {
-          window.VocaPopup.setSaveButtonState(shadow, "anon");
-        }, 2000);
-        return;
-      }
-      session = signInResp.session;
-    }
-
     window.VocaPopup.setSaveButtonState(shadow, "saving");
+    await persistWord(shadow, model, contextSentence);
+  }
+
+  async function persistWord(shadow, model, contextSentence) {
     const saveResp = await sendMessage({
       action: "vocab.add",
       lemma: model.word,
