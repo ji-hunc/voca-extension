@@ -6,7 +6,8 @@ VocaNova 프로젝트의 일부로, 같은 Supabase 백엔드를 공유하는 [i
 
 ## 실행화면
 
-<!-- 스크린샷 추가 -->
+<img width="1792" height="1132" alt="스크린샷 2026-05-10 오후 5 13 28" src="https://github.com/user-attachments/assets/86491e19-8153-4083-b387-2a301eb5fa81" />
+
 
 ## 주요 기능
 
