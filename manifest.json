@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VocaNova",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "영단어를 드래그하거나 더블클릭하면 네이버 사전으로 즉시 뜻을 보여주고, 단어장에 저장합니다.",
 
   "permissions": ["declarativeNetRequest", "identity", "storage"],
